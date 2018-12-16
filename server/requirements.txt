@@ -1,0 +1,17 @@
+Flask
+cherrypy
+Flask-Script
+Flask-SSLify
+Flask-HTTPAuth
+flask-cors
+PyJWT
+pywaves
+requests
+ipfsapi
+passlib
+python-magic
+flask-mysqldb
+sendgrid
+validate_email
+pyDNS
+pyblake2

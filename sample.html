@@ -1,0 +1,93 @@
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jshashes/1.0.6/hashes.min.js"></script>
+
+<script>
+
+  // generate seed
+  function seed(num_zero_nibbles=32, num_random_nibbles=32) {
+    var s = "";
+    // first add zeros
+    for (var i = 0; i < num_zero_nibbles; i++) { s += "0"; }
+    // then add randoms
+    var allowed = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < num_random_nibbles; i++) {
+      s += allowed.charAt(Math.floor(Math.random() * allowed.length));
+    }
+
+    // return s;
+    return '0000000000000000000000000000000027ae41e4649b934ca495991b7852b855';
+  }
+
+  // hashchain
+  function hashchain(seed, num_links) {
+    var h = seed
+    for (var i = 0; i < num_links; i++) {
+      h = new Hashes.SHA256().hex(h)
+      console.log(i, h);
+      
+    }
+    return h
+  }
+
+  function prove(age) {
+    P = hashchain(S, Number(age)+1)
+    // P = hashchain(S, Number(age))
+    document.getElementById("display_P").innerHTML = P
+    return P
+  }
+
+  function challenge(age, age_to_prove) {
+    Q = hashchain(S, Number(age)+1-Number(age_to_prove))
+    // Q = hashchain(S, Number(age)-Number(age_to_prove))
+    document.getElementById("display_Q").innerHTML = Q
+    return Q
+  }
+
+  function verify(Q, age_to_prove, P) {
+    V = hashchain(Q, Number(age_to_prove))
+    document.getElementById("display_V").innerHTML = V
+    if (P==V) {
+      document.getElementById("verified").innerHTML = "VERIFIED!"
+    }
+    else {
+      document.getElementById("verified").innerHTML = "FAILED!"
+    }
+    return V
+  }
+
+</script>
+
+<button onclick='S=seed();document.getElementById("display_S").innerHTML = S'>
+  recreate seed
+</button>
+
+<hr/>
+
+<p id="display_S"></p>
+
+<p>Actual Age: <input type="text" name="actual_age" id="actual_age" value="38">
+<button onclick='P=prove(document.getElementById("actual_age").value)'>
+  create Proof
+</button>
+<div id="display_P"></div>
+
+
+<p>Age To Prove: <input type="text" name="age_to_prove" id="age_to_prove" value="19">
+<button onclick='Q=challenge(document.getElementById("actual_age").value, document.getElementById("age_to_prove").value)'>
+  create Challenge
+</button>
+<div id="display_Q"></div>
+
+<hr/>
+
+<button onclick='V=verify(Q, document.getElementById("age_to_prove").value, P)'>
+  verify challenge
+</button>
+<br/><br/>
+<div id="display_V"></div>
+<div id="verified"></div>
+
+<script>
+  // start with a seed
+  S=seed();
+  document.getElementById("display_S").innerHTML = S
+</script>

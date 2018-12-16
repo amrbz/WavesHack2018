@@ -1,0 +1,51 @@
+version: "2"
+
+services:
+  nginx:
+    image: chainify/nginx
+    container_name: nginx
+    ports:
+      - 443:443
+      - 80:80
+    restart: always
+    
+  web:
+    image: chainify/web
+    container_name: web
+    depends_on:
+      - api
+    restart: always
+    command: bash -c "npm run start"
+
+  api:
+    image: chainify/api
+    container_name: api
+    depends_on:
+      - crate
+      - ipfs
+    restart: always
+    command: bash -c "python server.py"
+    environment:
+      FLASK_CONFIG: production
+    tty: true
+    stdin_open: true
+
+  ipfs:
+    image: jbenet/go-ipfs:latest
+    container_name: ipfs
+    volumes:
+      - ~/.data/ipfs/chainify:/data/ipfs
+    restart: always
+    tty: true
+    stdin_open: true
+
+  maria:
+    image: chainify/maria
+    container_name: maria
+    volumes:
+      - ~/.mariadb:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+    restart: always

@@ -1,0 +1,55 @@
+version: "2"
+
+services:
+  nginx:
+    build: ./nginx
+    image: kyc/nginx
+    container_name: nginx
+    ports:
+      - 443:443
+      - 80:80
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf
+    restart: unless-stopped
+    
+  web:
+    build: ./web
+    image: kyc/web
+    container_name: web
+    volumes:
+      - ./web:/opt
+    depends_on:
+      - api
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    command: bash -c "npm install -y && npm run dev"
+
+
+  api:
+    build: ./server
+    image: kyc/api
+    container_name: api
+    volumes:
+      - ./server:/opt
+    depends_on:
+      - maria
+    restart: unless-stopped
+    command: bash -c "python server.py"
+    environment:
+      FLASK_CONFIG: development
+    tty: true
+    stdin_open: true
+
+
+  maria:
+    build: ./maria
+    image: kyc/maria
+    container_name: maria
+    volumes:
+      - ~/.data/kyc_mariadb:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+    restart: unless-stopped
